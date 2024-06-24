@@ -82,7 +82,7 @@
 #include <menu/two_btn_menu.h>
 
 #include "simple_peripheral_menu.h"
-#include "simple_peripheral.h"
+#include "task_ble.h"
 
 #ifdef PTM_MODE
 #include "npi_task.h"              // To allow RX event registration

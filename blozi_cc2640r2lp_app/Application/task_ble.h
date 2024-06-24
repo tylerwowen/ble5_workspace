@@ -1,6 +1,6 @@
 /******************************************************************************
 
- @file  simple_peripheral.h
+ @file  task_ble.h
 
  @brief This file contains the Simple Peripheral sample application
         definitions and prototypes.

@@ -3,7 +3,7 @@
 
 #include <menu/two_btn_menu.h>
 #include "simple_peripheral_menu.h"
-#include "simple_peripheral.h"
+#include "task_ble.h"
 
 /*
  * Menu Lists Initializations

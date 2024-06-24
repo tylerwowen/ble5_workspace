@@ -58,7 +58,7 @@
 #include <icall.h>
 #include "hal_assert.h"
 #include "bcomdef.h"
-#include "simple_peripheral.h"
+#include "task_ble.h"
 #ifdef PTM_MODE
 #include "npi_task.h"
 #endif // PTM_MODE
