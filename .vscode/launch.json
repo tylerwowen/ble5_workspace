@@ -15,7 +15,15 @@
             "type": "debugpy",
             "request": "launch",
             "module": "ui",
-            "args": ["pillow", "-s", "TWO_INCH_NINE", "-d", "{'name': 'tyler'}"],
+            "args": [
+                "pillow",
+                "-s",
+                "TWO_INCH_NINE",
+                "-d",
+                "{'name': 'tyler'}",
+                "-l",
+                "HelloWorld"
+            ],
             "console": "integratedTerminal"
         }
     ]

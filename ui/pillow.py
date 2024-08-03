@@ -1,21 +1,20 @@
-from ui.constants import LayoutType, DisplaySize
-from ui.layouts.helloworld import HelloWorld
+from ui.constants import DisplaySize
+from ui.layouts import *
 
 
 def pillow(
-    layout_type: str = LayoutType.HELLOWORLD.name,
+    layout_type: str = "HelloWorld",
     size: str = DisplaySize.TWO_INCH_NINE.name,
     data=None,
 ):
     if data is None:
         data = {}
-    # Convert string arguments to enums
-    layout_type = LayoutType[layout_type.upper()]
     size = DisplaySize[size.upper()].value
 
-    if layout_type == LayoutType.HELLOWORLD:
-
-        layout = HelloWorld(size, data)
-        layout.render()
+    # Instantiate the class based on user input class name
+    layout_class = globals().get(layout_type)
+    if layout_class:
+        layout = layout_class(size, data)
     else:
         raise ValueError(f"Unknown layout type: {layout_type}")
+    layout.render()

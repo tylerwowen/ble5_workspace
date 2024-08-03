@@ -1,29 +1,16 @@
-from PIL import Image, ImageDraw, ImageFont
-from ui.layouts.base_layout import BaseLayout
+from PIL import ImageDraw, ImageFont
+from ui.layouts.half_red import HalfRed
 
 
-class HelloWorld(BaseLayout):
+class HelloWorld(HalfRed):
     def __init__(self, size, data=None):
-        if data is None:
-            data = {"name": "World"}
-        self.size = size
+        super().__init__(size, data)
         self.name = data.get("name", "World")
 
-    def _draw_bg(self, draw: ImageDraw):
-        draw.rectangle((0, 0, self.size[0], self.size[1] / 2), fill="red")
-
-    def _draw_text(self, draw: ImageDraw):
+    def draw(self, draw: ImageDraw):
+        super().draw(draw)
         fnt = ImageFont.truetype("ui/fonts/SanFranciscoDisplay-Regular.otf", 40)
         draw.font = fnt
-        draw.fontmode = "1" # Disable antialiasing
-        draw.text((10, 10), "Hello", fill=(255, 255, 255, 255))
-        draw.text(
-            (self.size[0] / 2, self.size[1] / 2 + 10), self.name, fill=(0, 0, 0, 255)
-        )
-
-    def render(self):
-        with Image.new("RGB", self.size, "white") as im:
-            draw = ImageDraw.Draw(im)
-            self._draw_bg(draw)
-            self._draw_text(draw)
-            im.save("helloworld.png", "PNG")
+        draw.fontmode = "1"  # Disable antialiasing
+        draw.text((10, 10), "Hello", fill="white")
+        draw.text((self.size[0] / 2, self.size[1] / 2 + 10), self.name, fill="black")
