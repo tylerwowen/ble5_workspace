@@ -1,7 +1,7 @@
 import fire
 from .pillow import pillow
 from .tkinter import tkinter
-
+from .uploader import Uploader
 
 def main():
     """
@@ -12,7 +12,7 @@ def main():
     - "tkinter": Starts the application using the tkinter library.
     - "pillow": Starts the application using the pillow library.
     """
-    fire.Fire({"tkinter": tkinter, "pillow": pillow})
+    fire.Fire({"tkinter": tkinter, "pillow": pillow, "upload": Uploader})
 
 
 if __name__ == "__main__":

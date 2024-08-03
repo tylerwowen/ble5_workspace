@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 88
-
+sort-imports = true
 
 [tool.pylint.main]
 # Analyse import fallback blocks. This can be used to support both Python 2 and 3
