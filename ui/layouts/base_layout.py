@@ -1,4 +1,5 @@
 import abc
+
 from PIL import Image, ImageDraw
 
 
@@ -11,11 +12,11 @@ class BaseLayout(metaclass=abc.ABCMeta):
         self.data = data
 
     @abc.abstractmethod
-    def draw(self, draw: ImageDraw):
+    def draw(self, image_draw: ImageDraw):
         pass
 
     def render(self):
         with Image.new("RGB", self.size, "white") as im:
-            draw = ImageDraw.Draw(im)
-            self.draw(draw)
+            image_draw = ImageDraw.Draw(im)
+            self.draw(image_draw)
             im.save(f"{str(self.__class__.__name__)}.png", "PNG")
