@@ -1,11 +1,13 @@
-from contextlib import asynccontextmanager
 import logging
+import sys
 import time
-
-from rich.progress import track
+from contextlib import asynccontextmanager
 
 from bleak import BleakClient, BleakScanner
 from bleak.uuids import normalize_uuid_16
+from rich.progress import track
+
+from .process_image import download_image_if_needed, image_to_bwr_data
 
 # commands support by firmware
 EPD_CMD_CLR = 1
@@ -29,12 +31,14 @@ class Uploader(object):
     def __init__(
         self,
         name_prefix="C26_",
+        mac=None,
         log_level=logging.DEBUG,
         timeout=30,
     ):
         self.name_prefix = name_prefix
         self._logger = self._setup_logger(log_level)
         self.timeout = timeout
+        self.mac = mac
 
     def _filter_device(self, device, advertisement_data):
         if not device.name:
@@ -55,22 +59,24 @@ class Uploader(object):
 
     @asynccontextmanager
     async def _ble_client(self):
-        self._logger.info("starting scan...")
-
-        device = await BleakScanner.find_device_by_filter(
-            filterfunc=self._filter_device,
-            timeout=self.timeout,
-        )
-        if device is None:
-            self._logger.error("could not find device with name: %s", self.name_prefix)
-            raise FileNotFoundError("device not found")
-
+        device = self.mac
+        device_str = device
+        if not device:
+            self._logger.info("starting scan...")
+            device = await BleakScanner.find_device_by_filter(
+                filterfunc=self._filter_device,
+                timeout=self.timeout,
+            )
+            if device is None:
+                self._logger.error(
+                    "could not find device with name: %s", self.name_prefix
+                )
+                raise FileNotFoundError("device not found")
+            device_str = device.name if device.name else device.address
         self._logger.info("connecting to device...")
 
         async with BleakClient(device, timeout=self.timeout) as client:
-            self._logger.info(
-                "connected to: %s", device.name if device.name else device.address
-            )
+            self._logger.info("connected to: %s", device_str)
             yield client
             self._logger.info("disconnecting...")
             await client.disconnect()
@@ -93,9 +99,9 @@ class Uploader(object):
             for i in track(range(0, len(payload), chunk_size), "Sending buf..."):
                 chunk = payload[i : i + chunk_size]
                 cmd = cmd if i == 0 else EPD_CMD_BUF_CONT
-                # logger.debug(f"sending chunk={i+len(chunk)} of data={len(payload)}")
+                # self._logger.debug(f"sending chunk={i+len(chunk)} of data={len(payload)}")
                 await client.write_gatt_char(
-                    normalize_uuid_16(0xFFFE), bytes([cmd] + chunk)
+                    normalize_uuid_16(0xFFFE), bytes([cmd] + chunk), response=False
                 )
             return
         else:
@@ -171,10 +177,19 @@ class Uploader(object):
     # 1. image file path
     # 2. image url
     async def upload_image(self, image: str, width: int = 296, height: int = 128):
-        async with self._ble_client() as client:
-            from .process_image import download_image_if_needed, image_to_bwr_data
-
-            image_path = download_image_if_needed(image)
-            # convert 6608697102119889260_296x152.jpg -dither FloydSteinberg -define dither:diffusion-amount=85% -remap palette.png bmp:output.bmp
-            bw, red = image_to_bwr_data(image_path, width=width, height=height)
-            await self._upload_image_bwr_data(client, bw, red)
+        image_path = download_image_if_needed(image)
+        # convert 6608697102119889260_296x152.jpg -dither FloydSteinberg -define dither:diffusion-amount=85% -remap palette.png bmp:output.bmp
+        bw, red = image_to_bwr_data(image_path, width=width, height=height)
+        
+        self._logger.debug("size of bw: %d, red: %d", len(bw), len(red))
+        for i in range(0, len(bw), 64):
+            chunk = bw[i : i + 64]
+            hex_chunk = " ".join(f"{byte:02x}" for byte in chunk)
+            self._logger.debug(hex_chunk)
+        
+        try:
+            async with self._ble_client() as client:
+                await self._upload_image_bwr_data(client, bw, red)
+        except FileNotFoundError as e:
+            self._logger.error(e)
+            sys.exit(1)

@@ -25,6 +25,38 @@
                 "HelloWorld"
             ],
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Generate Todos",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "ui",
+            "args": [
+                "pillow",
+                "-s",
+                "TWO_INCH_NINE",
+                "-d",
+                "{'name': 'tyler'}",
+                "-l",
+                "Todos"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Upload todo to device",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "ui",
+            "args": [
+                "upload",
+                "-n",
+                "C26_b11024",
+                "-t",
+                "60",
+                "upload_image",
+                "Todos.png",
+            ],
+            "console": "integratedTerminal"
         }
     ]
 }

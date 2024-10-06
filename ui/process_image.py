@@ -1,7 +1,12 @@
-from PIL import Image
-import fire
+import logging
 import os
 import tempfile
+from math import log
+
+import fire
+from PIL import Image
+
+logger = logging.getLogger(__name__)
 
 
 def generate_temp_output_path(input_path: str, ext: str = None) -> str:
@@ -124,12 +129,14 @@ def image_to_bwr_data(
     width: int,
     height: int,
     dither=Image.Dither.FLOYDSTEINBERG,
+    log_level=logging.DEBUG,
 ):
-    # logger.debug(f"processing image: {image_path}")
+    logger.setLevel(log_level)
+    logger.debug(f"processing image: {image_path}")
     fp = resize_image(image_path, width, height)
-    # logger.debug(f"resized image: {fp}")
+    logger.debug(f"resized image: {fp}")
     fp = remap_image(fp, dither=dither)
-    # logger.debug(f"remapped image: {fp}")
+    logger.debug(f"remapped image: {fp}")
 
     img = Image.open(fp).convert("RGB")
     width, height = img.size
