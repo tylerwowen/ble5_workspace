@@ -1,0 +1,65 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add E-Tag Display",
+        "description": "Select an E-Tag device to configure",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "mode": {
+        "title": "Choose Content Mode",
+        "description": "Select what this tag should display",
+        "data": {
+          "mode": "Content Mode"
+        }
+      },
+      "todo_config": {
+        "title": "Configure Todo List",
+        "description": "Select the todo list to display",
+        "data": {
+          "entity_id": "Todo List Entity",
+          "show_completed": "Show Completed Items",
+          "max_items": "Maximum Items"
+        }
+      },
+      "calendar_config": {
+        "title": "Configure Calendar",
+        "description": "Select the calendar to display",
+        "data": {
+          "entity_id": "Calendar Entity",
+          "hours_ahead": "Hours Ahead",
+          "max_events": "Maximum Events"
+        }
+      },
+      "network_config": {
+        "title": "Configure Network Stats",
+        "description": "Select sensors to display",
+        "data": {
+          "device_count_entity": "Device Count Sensor",
+          "bandwidth_entity": "Bandwidth Sensor (optional)",
+          "uptime_entity": "Uptime Sensor (optional)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to device",
+      "unknown": "Unknown error occurred"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Update Configuration",
+        "description": "Change the tag's settings",
+        "data": {
+          "mode": "Content Mode"
+        }
+      }
+    }
+  }
+}
