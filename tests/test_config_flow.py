@@ -14,6 +14,7 @@ def mock_ble_device():
     device = MagicMock()
     device.name = "E-Tag-AABBCC"
     device.address = "AA:BB:CC:DD:EE:FF"
+    device.service_uuids = ["0000fff0-0000-1000-8000-00805f9b34fb"]
     return device
 
 
