@@ -62,3 +62,24 @@ async def test_read_temperature(hass: HomeAssistant, mock_ble_device, mock_bleak
 
     assert temp == 23
     mock_bleak_client.read_gatt_char.assert_called_once_with(CHAR_TEMP)
+
+
+async def test_write_image(hass: HomeAssistant, mock_ble_device, mock_bleak_client):
+    """Test writing image to device."""
+    bw_data = [0xFF] * 100  # Mock black/white data
+    red_data = [0x00] * 100  # Mock red data
+
+    with patch(
+        "custom_components.etag_display.ble_client.bluetooth.async_ble_device_from_address",
+        return_value=mock_ble_device,
+    ), patch(
+        "custom_components.etag_display.ble_client.BleakClient",
+        return_value=mock_bleak_client,
+    ), patch(
+        "custom_components.etag_display.ble_client.asyncio.sleep"
+    ):
+        client = HAETagClient(hass, "AA:BB:CC:DD:EE:FF")
+        await client.write_image(bw_data, red_data)
+
+    # Verify commands were sent
+    assert mock_bleak_client.write_gatt_char.call_count > 0
