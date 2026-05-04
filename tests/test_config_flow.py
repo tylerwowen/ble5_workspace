@@ -1,0 +1,34 @@
+"""Tests for the E-Tag Display config flow."""
+import pytest
+from unittest.mock import AsyncMock, patch, MagicMock
+from homeassistant import config_entries
+from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
+
+from custom_components.etag_display.const import DOMAIN
+
+
+@pytest.fixture
+def mock_ble_device():
+    """Mock BLE device."""
+    device = MagicMock()
+    device.name = "E-Tag-AABBCC"
+    device.address = "AA:BB:CC:DD:EE:FF"
+    return device
+
+
+async def test_user_step_shows_discovered_devices(
+    hass: HomeAssistant, mock_ble_device
+):
+    """Test user step shows discovered E-Tag devices."""
+    with patch(
+        "custom_components.etag_display.config_flow.async_discovered_service_info",
+        return_value=[mock_ble_device],
+    ):
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+
+    assert result["type"] == FlowResultType.FORM
+    assert result["step_id"] == "user"
+    assert "device" in result["data_schema"].schema
