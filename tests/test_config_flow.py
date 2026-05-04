@@ -33,3 +33,63 @@ async def test_user_step_shows_discovered_devices(
     assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "user"
     assert "device" in result["data_schema"].schema
+
+
+async def test_mode_step_shows_available_modes(
+    hass: HomeAssistant, mock_ble_device
+):
+    """Test mode selection step shows available content modes."""
+    with patch(
+        "custom_components.etag_display.config_flow.async_discovered_service_info",
+        return_value=[mock_ble_device],
+    ):
+        # Complete user step
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {"device": mock_ble_device.address},
+        )
+
+    assert result["type"] == FlowResultType.FORM
+    assert result["step_id"] == "mode"
+
+
+async def test_todo_config_creates_entry(hass: HomeAssistant, mock_ble_device):
+    """Test todo config step creates entry."""
+    with patch(
+        "custom_components.etag_display.config_flow.async_discovered_service_info",
+        return_value=[mock_ble_device],
+    ):
+        # Complete user step
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {"device": mock_ble_device.address},
+        )
+
+        # Complete mode step
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {"mode": "Todos"},
+        )
+
+        # Complete todo config
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {
+                "entity_id": "todo.shopping_list",
+                "show_completed": False,
+                "max_items": 10,
+            },
+        )
+
+    assert result["type"] == FlowResultType.CREATE_ENTRY
+    assert result["title"] == "E-Tag-AABBCC"
+    assert result["data"]["mac_address"] == "AA:BB:CC:DD:EE:FF"
+    assert result["data"]["mode"] == "Todos"
+    assert result["data"]["config"]["entity_id"] == "todo.shopping_list"
