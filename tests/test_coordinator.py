@@ -36,3 +36,17 @@ async def test_coordinator_init(hass: HomeAssistant, mock_config_entry):
     assert coordinator.config["entity_id"] == "todo.shopping_list"
     assert coordinator.last_hash is None
     assert coordinator.last_update is None
+
+
+async def test_setup_listeners_for_todos(hass: HomeAssistant, mock_config_entry):
+    """Test listeners are set up for todo mode."""
+    coordinator = ETagDisplayCoordinator(hass, mock_config_entry)
+
+    coordinator._setup_listeners()
+
+    # Verify listener was registered
+    assert len(coordinator._event_listeners) > 0
+
+    # Cleanup
+    coordinator._cleanup_listeners()
+    assert len(coordinator._event_listeners) == 0

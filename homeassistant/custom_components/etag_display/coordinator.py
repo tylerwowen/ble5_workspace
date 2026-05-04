@@ -67,8 +67,72 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
 
     def _setup_listeners(self) -> None:
         """Setup state change listeners based on mode."""
-        # Placeholder - will be implemented in next task
-        pass
+        if self.mode == MODE_TODOS:
+            # Listen for changes to the todo entity
+            entity_id = self.config["entity_id"]
+
+            @callback
+            def todo_state_changed(event: Event) -> None:
+                """Handle todo state change."""
+                if event.data.get("entity_id") == entity_id:
+                    self._debounced_update()
+
+            remove_listener = self.hass.bus.async_listen(
+                EVENT_STATE_CHANGED, todo_state_changed
+            )
+            self._event_listeners.append(remove_listener)
+
+        elif self.mode == MODE_CALENDAR:
+            # Listen for changes to the calendar entity
+            entity_id = self.config["entity_id"]
+
+            @callback
+            def calendar_state_changed(event: Event) -> None:
+                """Handle calendar state change."""
+                if event.data.get("entity_id") == entity_id:
+                    self._debounced_update()
+
+            remove_listener = self.hass.bus.async_listen(
+                EVENT_STATE_CHANGED, calendar_state_changed
+            )
+            self._event_listeners.append(remove_listener)
+
+        elif self.mode == MODE_NETWORK_STATS:
+            # Listen for changes to network stat sensors
+            device_count_entity = self.config.get("device_count_entity")
+            bandwidth_entity = self.config.get("bandwidth_entity")
+            uptime_entity = self.config.get("uptime_entity")
+
+            monitored_entities = [
+                entity for entity in [device_count_entity, bandwidth_entity, uptime_entity]
+                if entity is not None
+            ]
+
+            @callback
+            def network_stat_changed(event: Event) -> None:
+                """Handle network stat change."""
+                if event.data.get("entity_id") in monitored_entities:
+                    self._debounced_update()
+
+            if monitored_entities:
+                remove_listener = self.hass.bus.async_listen(
+                    EVENT_STATE_CHANGED, network_stat_changed
+                )
+                self._event_listeners.append(remove_listener)
+
+    @callback
+    def _debounced_update(self) -> None:
+        """Schedule debounced update."""
+        # Cancel any pending update
+        if self._update_task and not self._update_task.done():
+            self._update_task.cancel()
+
+        # Schedule update after debounce window
+        async def debounced() -> None:
+            await asyncio.sleep(DEBOUNCE_WINDOW)
+            await self._async_update_display()
+
+        self._update_task = self.hass.async_create_task(debounced())
 
     def _cleanup_listeners(self) -> None:
         """Remove all event listeners."""
