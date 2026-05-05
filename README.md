@@ -1,8 +1,8 @@
 # E-Tag Display Integration for Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-[![GitHub Release](https://img.shields.io/github/release/touyang/ble5-workspace.svg)](https://github.com/touyang/ble5-workspace/releases)
-[![License](https://img.shields.io/github/license/touyang/ble5-workspace.svg)](LICENSE)
+[![GitHub Release](https://img.shields.io/github/release/tylerwowen/ble5-workspace.svg)](https://github.com/tylerwowen/ble5-workspace/releases)
+[![License](https://img.shields.io/github/license/tylerwowen/ble5-workspace.svg)](LICENSE)
 
 A Home Assistant custom integration for CC2640R2-based electronic paper (e-paper) display tags. This integration automatically renders and displays todo lists, calendar events, or network statistics on battery-powered BLE e-paper tags.
 
@@ -49,7 +49,7 @@ A Home Assistant custom integration for CC2640R2-based electronic paper (e-paper
 1. Open HACS in Home Assistant
 2. Click the three dots in the top right corner
 3. Select "Custom repositories"
-4. Add `https://github.com/touyang/ble5-workspace` with category "Integration"
+4. Add `https://github.com/tylerwowen/ble5-workspace` with category "Integration"
 5. Click "E-Tag Display" in the list
 6. Click "Download"
 7. Restart Home Assistant
@@ -157,7 +157,7 @@ automation:
           entity_id: select.etag_display_mode
         data:
           option: "Calendar"
-  
+
   - alias: "E-Tag Show Todos After Work"
     trigger:
       - platform: time
