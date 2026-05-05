@@ -1,12 +1,11 @@
 """Tests for E-Tag Display entities."""
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from homeassistant.core import HomeAssistant
-from homeassistant.config_entries import ConfigEntry
 
-from custom_components.etag_display.entity import ETagSelectEntity, ETagSensorEntity
+import pytest
+from homeassistant.core import HomeAssistant
+
+from custom_components.etag_display.const import MODE_TODOS
 from custom_components.etag_display.coordinator import ETagDisplayCoordinator
-from custom_components.etag_display.const import MODE_TODOS, MODE_CALENDAR
+from custom_components.etag_display.entity import ETagSelectEntity, ETagSensorEntity
 
 
 @pytest.fixture
@@ -40,6 +39,7 @@ async def test_sensor_entity_state(hass: HomeAssistant, mock_coordinator):
 
     # Set last_update = updated
     from datetime import datetime
+
     mock_coordinator.last_update = datetime.now()
     assert entity.native_value == "updated"
 
@@ -51,6 +51,7 @@ async def test_sensor_entity_state(hass: HomeAssistant, mock_coordinator):
 async def test_sensor_entity_attributes(hass: HomeAssistant, mock_coordinator):
     """Test sensor entity exposes correct attributes."""
     from datetime import datetime
+
     mock_coordinator.last_update = datetime.now()
 
     entity = ETagSensorEntity(mock_coordinator)

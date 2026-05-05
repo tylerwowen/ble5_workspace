@@ -1,4 +1,5 @@
 """Coordinator for E-Tag Display integration."""
+
 from __future__ import annotations
 
 import asyncio
@@ -6,38 +7,39 @@ import hashlib
 import json
 import logging
 import os
-import tempfile
-from datetime import datetime, timedelta
-from typing import Any
-
-from homeassistant.core import HomeAssistant, Event, callback
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EVENT_STATE_CHANGED
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-
-from .const import (
-    DOMAIN,
-    MODE_TODOS,
-    MODE_CALENDAR,
-    MODE_NETWORK_STATS,
-    DEBOUNCE_WINDOW,
-    BLE_RETRY_DELAYS,
-    DISPLAY_WIDTH,
-    DISPLAY_HEIGHT,
-)
-from .ble_client import HAETagClient
 
 # Import from ui package for rendering
 import sys
+import tempfile
+from datetime import datetime, timedelta
+from typing import Any, Callable
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EVENT_STATE_CHANGED
+from homeassistant.core import Event, HomeAssistant, callback
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+
+from .ble_client import HAETagClient
+from .const import (
+    BLE_RETRY_DELAYS,
+    DEBOUNCE_WINDOW,
+    DISPLAY_HEIGHT,
+    DISPLAY_WIDTH,
+    DOMAIN,
+    MODE_CALENDAR,
+    MODE_NETWORK_STATS,
+    MODE_TODOS,
+)
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../"))
+from ui.constants import DisplaySize
 from ui.pillow import pillow
 from ui.process_image import image_to_bwr_data
-from ui.constants import DisplaySize
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class ETagDisplayCoordinator(DataUpdateCoordinator):
+class ETagDisplayCoordinator(DataUpdateCoordinator):  # type: ignore[misc]
     """E-Tag Display coordinator for event-driven updates."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -63,7 +65,7 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
 
         # Debounce handling
         self._update_task: asyncio.Task | None = None
-        self._event_listeners: list[callable] = []
+        self._event_listeners: list[Callable] = []
 
     async def async_setup(self) -> None:
         """Set up the coordinator."""
@@ -78,7 +80,7 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
             # Listen for changes to the todo entity
             entity_id = self.config["entity_id"]
 
-            @callback
+            @callback  # type: ignore[untyped-decorator]
             def todo_state_changed(event: Event) -> None:
                 """Handle todo state change."""
                 if event.data.get("entity_id") == entity_id:
@@ -93,7 +95,7 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
             # Listen for changes to the calendar entity
             entity_id = self.config["entity_id"]
 
-            @callback
+            @callback  # type: ignore[untyped-decorator]
             def calendar_state_changed(event: Event) -> None:
                 """Handle calendar state change."""
                 if event.data.get("entity_id") == entity_id:
@@ -111,11 +113,12 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
             uptime_entity = self.config.get("uptime_entity")
 
             monitored_entities = [
-                entity for entity in [device_count_entity, bandwidth_entity, uptime_entity]
+                entity
+                for entity in [device_count_entity, bandwidth_entity, uptime_entity]
                 if entity is not None
             ]
 
-            @callback
+            @callback  # type: ignore[untyped-decorator]
             def network_stat_changed(event: Event) -> None:
                 """Handle network stat change."""
                 if event.data.get("entity_id") in monitored_entities:
@@ -127,7 +130,7 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
                 )
                 self._event_listeners.append(remove_listener)
 
-    @callback
+    @callback  # type: ignore[untyped-decorator]
     def _debounced_update(self) -> None:
         """Schedule debounced update."""
         # Cancel any pending update
@@ -224,7 +227,7 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
 
     async def _fetch_network_stats(self) -> dict[str, Any]:
         """Fetch network statistics from Home Assistant."""
-        stats = {}
+        stats: dict[str, Any] = {}
 
         # Device count (required)
         device_count_entity = self.config.get("device_count_entity")
@@ -276,7 +279,7 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
             raise ValueError(f"Unknown mode: {self.mode}")
 
         # Run rendering in executor (PIL operations are blocking)
-        def _render():
+        def _render() -> str:
             # Create temporary file for output
             fd, output_path = tempfile.mkstemp(suffix=".png")
             os.close(fd)
@@ -300,11 +303,9 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
             else:
                 raise FileNotFoundError(f"Rendered file not found: {rendered_file}")
 
-        return await self.hass.async_add_executor_job(_render)
+        return await self.hass.async_add_executor_job(_render)  # type: ignore[no-any-return]
 
-    async def _upload_with_retry(
-        self, bw_data: list[int], red_data: list[int]
-    ) -> None:
+    async def _upload_with_retry(self, bw_data: list[int], red_data: list[int]) -> None:
         """Upload image to device with exponential backoff retry."""
         client = HAETagClient(self.hass, self.mac)
 
@@ -348,11 +349,13 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
             _LOGGER.debug(f"Rendered image: {image_path}")
 
             # Step 3: Convert to BWR format
-            def _convert():
-                return image_to_bwr_data(image_path, DISPLAY_WIDTH, DISPLAY_HEIGHT)
+            def _convert() -> tuple[list[int], list[int]]:
+                return image_to_bwr_data(image_path, DISPLAY_WIDTH, DISPLAY_HEIGHT)  # type: ignore[no-any-return]
 
             bw_data, red_data = await self.hass.async_add_executor_job(_convert)
-            _LOGGER.debug(f"Converted to BWR (bw: {len(bw_data)}B, red: {len(red_data)}B)")
+            _LOGGER.debug(
+                f"Converted to BWR (bw: {len(bw_data)}B, red: {len(red_data)}B)"
+            )
 
             # Clean up temp file
             try:

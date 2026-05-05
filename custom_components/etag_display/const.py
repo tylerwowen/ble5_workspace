@@ -1,4 +1,5 @@
 """Constants for the E-Tag Display integration."""
+
 from typing import Final
 
 DOMAIN: Final = "etag_display"

@@ -1,4 +1,5 @@
 """Entity classes for E-Tag Display integration."""
+
 from __future__ import annotations
 
 import logging
@@ -6,16 +7,15 @@ from typing import Any
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 
-from .const import DOMAIN, AVAILABLE_MODES, BATTERY_FULL, BATTERY_EMPTY
+from .const import AVAILABLE_MODES, BATTERY_EMPTY, BATTERY_FULL, DOMAIN
 from .coordinator import ETagDisplayCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class ETagSelectEntity(SelectEntity):
+class ETagSelectEntity(SelectEntity):  # type: ignore[misc]
     """Select entity for choosing display mode."""
 
     def __init__(self, coordinator: ETagDisplayCoordinator) -> None:
@@ -38,7 +38,7 @@ class ETagSelectEntity(SelectEntity):
     @property
     def current_option(self) -> str | None:
         """Return current mode."""
-        return self._coordinator.mode
+        return self._coordinator.mode  # type: ignore[no-any-return]
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected mode."""
@@ -71,7 +71,7 @@ class ETagSelectEntity(SelectEntity):
         self.async_write_ha_state()
 
 
-class ETagSensorEntity(SensorEntity):
+class ETagSensorEntity(SensorEntity):  # type: ignore[misc]
     """Sensor entity for display status and diagnostics."""
 
     def __init__(self, coordinator: ETagDisplayCoordinator) -> None:
@@ -144,7 +144,9 @@ class ETagSensorEntity(SensorEntity):
             return 100
         else:
             # (voltage - min) / (max - min) * 100
-            return int(((battery_mv - BATTERY_EMPTY) / (BATTERY_FULL - BATTERY_EMPTY)) * 100)
+            return int(
+                ((battery_mv - BATTERY_EMPTY) / (BATTERY_FULL - BATTERY_EMPTY)) * 100
+            )
 
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""

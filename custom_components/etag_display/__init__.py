@@ -1,4 +1,5 @@
 """The E-Tag Display integration."""
+
 from __future__ import annotations
 
 import logging
@@ -40,7 +41,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.info("Unloading E-Tag Display for %s", entry.data["name"])
 
     # Unload platforms
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    unload_ok: bool = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     if unload_ok:
         coordinator = hass.data[DOMAIN].pop(entry.entry_id)

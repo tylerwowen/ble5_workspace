@@ -1,27 +1,25 @@
 """BLE client for E-Tag devices using HA bluetooth integration."""
+
 from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
 
 from bleak import BleakClient
-from bleak.exc import BleakError
-
 from homeassistant.components import bluetooth
 from homeassistant.core import HomeAssistant
 
 from .const import (
+    BLE_TIMEOUT,
     CHAR_BATTERY,
-    CHAR_TEMP,
     CHAR_EPD,
-    EPD_CMD_RST,
+    CHAR_TEMP,
     EPD_CMD_BUF,
     EPD_CMD_BUF_CONT,
     EPD_CMD_BW,
-    EPD_CMD_RED,
     EPD_CMD_DP,
-    BLE_TIMEOUT,
+    EPD_CMD_RED,
+    EPD_CMD_RST,
 )
 
 _LOGGER = logging.getLogger(__name__)

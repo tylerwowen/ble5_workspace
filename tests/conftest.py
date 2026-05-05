@@ -1,10 +1,11 @@
 """Pytest configuration for E-Tag Display tests."""
-import pytest
+
 import sys
-from unittest.mock import MagicMock, AsyncMock, patch
 from pathlib import Path
+from unittest.mock import MagicMock
+
+import pytest
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_MAC
 
 # Add custom_components to Python path for imports
 repo_root = Path(__file__).parent.parent

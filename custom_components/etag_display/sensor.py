@@ -1,4 +1,5 @@
 """Sensor platform for E-Tag Display integration."""
+
 from __future__ import annotations
 
 import logging

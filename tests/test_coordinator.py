@@ -1,14 +1,13 @@
 """Tests for the E-Tag Display coordinator."""
 
-import json
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
-from homeassistant.core import HomeAssistant
-from homeassistant.config_entries import ConfigEntry
+from unittest.mock import MagicMock
 
+import pytest
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+
+from custom_components.etag_display.const import MODE_TODOS
 from custom_components.etag_display.coordinator import ETagDisplayCoordinator
-from custom_components.etag_display.const import MODE_TODOS, DOMAIN
 
 
 @pytest.fixture

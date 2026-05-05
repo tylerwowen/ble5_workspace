@@ -1,37 +1,38 @@
 """Config flow for E-Tag Display integration."""
+
 from __future__ import annotations
 
 import logging
 from typing import Any
 
 import voluptuous as vol
-
-from homeassistant import config_entries
 from homeassistant.components.bluetooth import (
     BluetoothServiceInfoBleak,
     async_discovered_service_info,
 )
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.selector import (
-    SelectSelector,
-    SelectSelectorConfig,
-    SelectSelectorMode,
+    BooleanSelector,
     EntitySelector,
     EntitySelectorConfig,
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
-    BooleanSelector,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
 )
 
+from homeassistant import config_entries
+
 from .const import (
+    AVAILABLE_MODES,
     DOMAIN,
-    SERVICE_UUID,
-    MODE_TODOS,
     MODE_CALENDAR,
     MODE_NETWORK_STATS,
-    AVAILABLE_MODES,
+    MODE_TODOS,
+    SERVICE_UUID,
 )
 
 # Note: entity.py will be implemented in Chunk 6
@@ -39,7 +40,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class ETagDisplayConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class ETagDisplayConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[call-arg,misc]
     """Handle a config flow for E-Tag Display."""
 
     VERSION = 1
@@ -145,9 +146,7 @@ class ETagDisplayConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ),
                 vol.Optional("show_completed", default=False): BooleanSelector(),
                 vol.Optional("max_items", default=10): NumberSelector(
-                    NumberSelectorConfig(
-                        min=1, max=20, mode=NumberSelectorMode.BOX
-                    )
+                    NumberSelectorConfig(min=1, max=20, mode=NumberSelectorMode.BOX)
                 ),
             }
         )
@@ -170,14 +169,10 @@ class ETagDisplayConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     EntitySelectorConfig(domain="calendar")
                 ),
                 vol.Optional("hours_ahead", default=24): NumberSelector(
-                    NumberSelectorConfig(
-                        min=1, max=168, mode=NumberSelectorMode.BOX
-                    )
+                    NumberSelectorConfig(min=1, max=168, mode=NumberSelectorMode.BOX)
                 ),
                 vol.Optional("max_events", default=5): NumberSelector(
-                    NumberSelectorConfig(
-                        min=1, max=10, mode=NumberSelectorMode.BOX
-                    )
+                    NumberSelectorConfig(min=1, max=10, mode=NumberSelectorMode.BOX)
                 ),
             }
         )
@@ -222,14 +217,15 @@ class ETagDisplayConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             title=self._selected_device.name or self._selected_device.address,
             data={
                 "mac_address": self._selected_device.address,
-                "name": self._selected_device.name or f"E-Tag {self._selected_device.address[-5:]}",
+                "name": self._selected_device.name
+                or f"E-Tag {self._selected_device.address[-5:]}",
                 "mode": self._selected_mode,
                 "config": config,
             },
         )
 
     @staticmethod
-    @callback
+    @callback  # type: ignore[untyped-decorator]
     def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
@@ -237,7 +233,7 @@ class ETagDisplayConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return ETagOptionsFlow(config_entry)
 
 
-class ETagOptionsFlow(config_entries.OptionsFlow):
+class ETagOptionsFlow(config_entries.OptionsFlow):  # type: ignore[misc]
     """Handle options flow for E-Tag Display."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
