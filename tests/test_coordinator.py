@@ -1,4 +1,5 @@
 """Tests for the E-Tag Display coordinator."""
+import json
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
@@ -50,3 +51,39 @@ async def test_setup_listeners_for_todos(hass: HomeAssistant, mock_config_entry)
     # Cleanup
     coordinator._cleanup_listeners()
     assert len(coordinator._event_listeners) == 0
+
+
+async def test_fetch_todo_data(hass: HomeAssistant, mock_config_entry):
+    """Test fetching todo data from HA."""
+    coordinator = ETagDisplayCoordinator(hass, mock_config_entry)
+
+    # Mock todo service response
+    mock_response = {
+        "todo.shopping_list": {
+            "items": [
+                {"summary": "Buy milk", "status": "needs_action", "due": "2026-05-05T00:00:00"},
+                {"summary": "Buy eggs", "status": "completed", "due": "2026-05-04T00:00:00"},
+            ]
+        }
+    }
+
+    with patch.object(
+        hass.services, "async_call", return_value=mock_response
+    ) as mock_call:
+        data = await coordinator._fetch_data()
+
+        # Verify service was called correctly
+        mock_call.assert_called_once_with(
+            "todo",
+            "get_items",
+            {"entity_id": "todo.shopping_list"},
+            blocking=True,
+            return_response=True,
+        )
+
+        # Verify data format
+        assert "todos" in data
+        todos = json.loads(data["todos"])
+        assert len(todos) == 1  # Only incomplete item (show_completed=False)
+        assert todos[0]["title"] == "Buy milk"
+        assert todos[0]["done"] is False

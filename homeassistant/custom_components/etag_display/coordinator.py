@@ -140,6 +140,122 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
             remove_listener()
         self._event_listeners.clear()
 
+    async def _fetch_data(self) -> dict[str, Any]:
+        """Fetch data from Home Assistant based on mode."""
+        if self.mode == MODE_TODOS:
+            return await self._fetch_todo_data()
+        elif self.mode == MODE_CALENDAR:
+            return await self._fetch_calendar_data()
+        elif self.mode == MODE_NETWORK_STATS:
+            return await self._fetch_network_stats()
+        else:
+            raise ValueError(f"Unknown mode: {self.mode}")
+
+    async def _fetch_todo_data(self) -> dict[str, Any]:
+        """Fetch todo list data from Home Assistant."""
+        entity_id = self.config["entity_id"]
+        show_completed = self.config.get("show_completed", False)
+        max_items = self.config.get("max_items", 10)
+
+        # Call the todo service to get items
+        response = await self.hass.services.async_call(
+            "todo",
+            "get_items",
+            {"entity_id": entity_id},
+            blocking=True,
+            return_response=True,
+        )
+
+        # Extract items from response
+        items = response.get(entity_id, {}).get("items", [])
+
+        # Filter by completed status
+        if not show_completed:
+            items = [item for item in items if item.get("status") != "completed"]
+
+        # Limit number of items
+        items = items[:max_items]
+
+        # Convert to simplified format
+        todos = [
+            {
+                "title": item.get("summary", ""),
+                "done": item.get("status") == "completed",
+                "due": item.get("due"),
+            }
+            for item in items
+        ]
+
+        return {"todos": json.dumps(todos)}
+
+    async def _fetch_calendar_data(self) -> dict[str, Any]:
+        """Fetch calendar events from Home Assistant."""
+        from homeassistant.components.calendar import async_get_events
+
+        entity_id = self.config["entity_id"]
+        hours_ahead = self.config.get("hours_ahead", 24)
+
+        # Calculate time range
+        start = datetime.now()
+        end = start + timedelta(hours=hours_ahead)
+
+        # Fetch events
+        events = await async_get_events(self.hass, entity_id, start, end)
+
+        # Convert to simplified format
+        calendar_events = [
+            {
+                "title": event.summary,
+                "start": event.start.isoformat(),
+                "end": event.end.isoformat(),
+                "all_day": event.start == event.start.date(),
+            }
+            for event in events
+        ]
+
+        return {"events": json.dumps(calendar_events)}
+
+    async def _fetch_network_stats(self) -> dict[str, Any]:
+        """Fetch network statistics from Home Assistant."""
+        stats = {}
+
+        # Device count (required)
+        device_count_entity = self.config.get("device_count_entity")
+        if device_count_entity:
+            state = self.hass.states.get(device_count_entity)
+            if state:
+                try:
+                    stats["device_count"] = int(float(state.state))
+                except (ValueError, TypeError):
+                    stats["device_count"] = 0
+            else:
+                stats["device_count"] = 0
+        else:
+            stats["device_count"] = 0
+
+        # Bandwidth (optional)
+        bandwidth_entity = self.config.get("bandwidth_entity")
+        if bandwidth_entity:
+            state = self.hass.states.get(bandwidth_entity)
+            if state:
+                try:
+                    stats["bandwidth"] = float(state.state)
+                except (ValueError, TypeError):
+                    stats["bandwidth"] = 0.0
+            else:
+                stats["bandwidth"] = 0.0
+
+        # Uptime (optional)
+        uptime_entity = self.config.get("uptime_entity")
+        if uptime_entity:
+            state = self.hass.states.get(uptime_entity)
+            if state:
+                stats["uptime"] = state.state
+            else:
+                stats["uptime"] = "Unknown"
+
+        return stats
+
     async def _async_update_display(self) -> None:
         """Update display with current content."""
         # Placeholder - will be implemented in Task 5.4
