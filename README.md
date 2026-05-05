@@ -24,7 +24,7 @@ A Home Assistant custom integration for CC2640R2-based electronic paper (e-paper
 
 - Home Assistant 2023.8 or later
 - Bluetooth integration enabled and configured
-- CC2640R2 e-tag device (hardware + firmware from [cc2640r2-etag](https://github.com/yourusername/cc2640r2-etag))
+- CC2640R2 e-tag device (hardware + firmware from [cc2640r2-etag](https://github.com/tylerwowen/cc2640r2-etag))
 - Python Pillow library (automatically installed)
 
 ## Installation
@@ -300,40 +300,7 @@ Images are converted to BWR (Black/White/Red) format:
 
 ## Development
 
-### Project Structure
-
-```
-etag_display/
-├── __init__.py           # Integration setup and entry point
-├── config_flow.py        # Configuration flow UI
-├── coordinator.py        # DataUpdateCoordinator implementation
-├── entity.py            # Select and Sensor entity classes
-├── ble_client.py        # BLE communication wrapper
-├── const.py             # Constants and configuration
-├── strings.json         # UI strings and translations
-├── manifest.json        # Integration metadata
-└── README.md            # This file
-```
-
-### Testing
-
-The integration can be tested without physical hardware using the included mock BLE client:
-
-```python
-# In ble_client.py, uncomment the MockETagClient class
-# and use it instead of HAETagClient in coordinator.py
-```
-
-For full integration testing with actual hardware, see `../../tests/integration_test.py`.
-
-### Contributing
-
-Contributions are welcome! Please:
-
-1. Test changes with actual e-tag hardware
-2. Follow Home Assistant's code style (use `black` and `pylint`)
-3. Add tests for new features
-4. Update this README for user-facing changes
+For development setup, testing, contributing guidelines, and architecture details, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## License
 
@@ -343,8 +310,8 @@ This integration is part of the BLE5 Workspace project. See the root LICENSE fil
 
 For issues, questions, or feature requests:
 
-- **GitHub Issues**: [https://github.com/yourusername/ble5-workspace/issues](https://github.com/yourusername/ble5-workspace/issues)
-- **Hardware/Firmware**: See [cc2640r2-etag repository](https://github.com/yourusername/cc2640r2-etag)
+- **GitHub Issues**: [https://github.com/tylerwowen/ble5-workspace/issues](https://github.com/tylerwowen/ble5-workspace/issues)
+- **Hardware/Firmware**: See [cc2640r2-etag repository](https://github.com/tylerwowen/cc2640r2-etag)
 
 ## Credits
 

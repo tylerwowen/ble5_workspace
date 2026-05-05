@@ -7,9 +7,9 @@ name = "etag-display"
 version = "0.1.0"
 description = "Home Assistant integration for CC2640R2 BLE e-paper display tags"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 authors = [
-    {name = "Tyler Ouyang", email = "tylerwowen@users.noreply.github.com"}
+    { name = "Tyler Ouyang", email = "tylerwowen@users.noreply.github.com" },
 ]
 keywords = ["homeassistant", "ble", "epaper", "cc2640r2"]
 classifiers = [
@@ -22,10 +22,13 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Home Automation",
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 dependencies = [
     "homeassistant>=2023.8.0",
-    "Pillow==10.2.0",
+    "Pillow>=10.2.0",
+    "pyserial>=3.5",
+    "fire>=0.6.0",
+    "rich>=13.7.0",
 ]
 
 [project.optional-dependencies]
@@ -46,7 +49,7 @@ Issues = "https://github.com/tylerwowen/ble5-workspace/issues"
 Firmware = "https://github.com/tylerwowen/cc2640r2-etag"
 
 [tool.setuptools]
-packages = ["custom_components.etag_display"]
+packages = ["custom_components.etag_display", "ui", "ui.layouts"]
 
 [tool.setuptools.package-data]
 "custom_components.etag_display" = ["*.json"]
@@ -73,23 +76,23 @@ exclude = '''
 line-length = 88
 target-version = "py311"
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "C",   # flake8-comprehensions
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
 ]
 ignore = [
-    "E501",  # line too long (handled by black)
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex
+    "E501", # line too long (handled by black)
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
 ]
 
 [tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"]  # unused imports in __init__.py
-"tests/*" = ["E501"]      # allow long lines in tests
+"__init__.py" = ["F401"] # unused imports in __init__.py
+"tests/*" = ["E501"]     # allow long lines in tests
 
 [tool.mypy]
 python_version = "3.11"
@@ -122,23 +125,12 @@ asyncio_mode = "auto"
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = [
-    "-ra",
-    "--strict-markers",
-    "--strict-config",
-    "--showlocals",
-]
-filterwarnings = [
-    "error",
-    "ignore::DeprecationWarning",
-]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
+filterwarnings = ["error", "ignore::DeprecationWarning"]
 
 [tool.coverage.run]
 source = ["custom_components/etag_display"]
-omit = [
-    "tests/*",
-    "*/__pycache__/*",
-]
+omit = ["tests/*", "*/__pycache__/*"]
 
 [tool.coverage.report]
 exclude_lines = [

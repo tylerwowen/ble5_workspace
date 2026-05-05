@@ -38,8 +38,8 @@ def test_calendar_renders():
         assert os.path.exists("Calendar.png")
 
         # Verify image dimensions
-        img = Image.open("Calendar.png")
-        assert img.size == DISPLAY_SIZE_2IN9
+        with Image.open("Calendar.png") as img:
+            assert img.size == DISPLAY_SIZE_2IN9
     finally:
         # Cleanup
         if os.path.exists("Calendar.png"):
@@ -64,8 +64,8 @@ def test_network_stats_renders():
         assert os.path.exists("NetworkStats.png")
 
         # Verify image dimensions
-        img = Image.open("NetworkStats.png")
-        assert img.size == DISPLAY_SIZE_2IN9
+        with Image.open("NetworkStats.png") as img:
+            assert img.size == DISPLAY_SIZE_2IN9
     finally:
         # Cleanup
         if os.path.exists("NetworkStats.png"):

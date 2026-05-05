@@ -19,19 +19,19 @@ ble5_workspace/
 ├── ui/
 │   ├── layouts/                # Display layout renderers
 │   │   ├── calendar.py         # Calendar events layout
-│   │   ├── network_stats.py   # Network statistics layout
+│   │   ├── network_stats.py    # Network statistics layout
 │   │   └── todo.py             # Todo list layout (existing)
 │   ├── pillow.py               # Rendering engine
 │   ├── process_image.py        # BWR conversion
 │   └── constants.py            # Display dimensions
 ├── tests/                      # Test suite
 │   ├── conftest.py             # Pytest configuration
-│   ├── test_config_flow.py    # Config flow tests
-│   ├── test_ble_client.py     # BLE client tests
-│   ├── test_coordinator.py    # Coordinator tests
-│   ├── test_entities.py       # Entity tests
-│   ├── test_layouts.py        # Layout tests
-│   └── test_integration.py    # End-to-end tests
+│   ├── test_config_flow.py     # Config flow tests
+│   ├── test_ble_client.py      # BLE client tests
+│   ├── test_coordinator.py     # Coordinator tests
+│   ├── test_entities.py        # Entity tests
+│   ├── test_layouts.py         # Layout tests
+│   └── test_integration.py     # End-to-end tests
 ├── docs/
 │   ├── superpowers/
 │   │   ├── specs/              # Design specifications
@@ -66,15 +66,27 @@ git clone https://github.com/tylerwowen/ble5-workspace.git
 cd ble5-workspace
 ```
 
-### 2. Install Python Dependencies
+### 2. Create Virtual Environment and Install Dependencies
+
+**Important:** Use Python 3.11 or 3.12. Python 3.13+ is not yet supported by Home Assistant.
 
 ```bash
+# Create virtual environment with Python 3.11 or 3.12
+python3.12 -m venv .venv  # or python3.11
+
+# Activate virtual environment
+source .venv/bin/activate  # On macOS/Linux
+# OR
+.venv\Scripts\activate  # On Windows
+
 # Install with development dependencies (recommended)
 pip install -e ".[dev]"
 
 # Or install runtime dependencies only
 pip install -e .
 ```
+
+**Note:** Always activate the virtual environment (`source .venv/bin/activate`) before development work. To deactivate when done, run `deactivate`.
 
 ### 3. Install for Development in Home Assistant
 
@@ -166,7 +178,7 @@ mypy custom_components/etag_display/
    ```bash
    # Via CLI
    ha core restart
-   
+
    # Or via UI
    Settings → System → Restart
    ```
@@ -175,7 +187,7 @@ mypy custom_components/etag_display/
    ```bash
    # Live tail
    tail -f ~/.homeassistant/home-assistant.log | grep etag_display
-   
+
    # Or via UI
    Settings → System → Logs
    ```
@@ -304,7 +316,7 @@ pytest tests/ -v
    ```bash
    # Linux
    hciconfig -a
-   
+
    # macOS
    system_profiler SPBluetoothDataType
    ```
@@ -375,13 +387,15 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
    - Test with actual hardware
    - Verify UI flows, BLE communication
 
-### Test Coverage Goals
+### Test Coverage
 
-- **Coordinator**: 80%+ (complex logic)
-- **BLE Client**: 70%+ (hardware interaction)
-- **Config Flow**: 80%+ (user-facing)
-- **Entities**: 70%+ (simple logic)
-- **Overall**: 75%+
+Current test suite includes:
+- **BLE Client Tests**: Battery reading, temperature reading, image writing
+- **Coordinator Tests**: Initialization, event listener setup
+- **Entity Tests**: Select entity options, sensor state and attributes
+- **Layout Tests**: Calendar rendering, network stats rendering
+
+**Note**: Config flow and integration tests require a full Home Assistant test environment and are not included in the current test suite. These should be manually tested when installing via HACS.
 
 ## Release Checklist
 

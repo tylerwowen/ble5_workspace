@@ -1,6 +1,8 @@
 """Tests for the E-Tag BLE client."""
-import pytest
+
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from homeassistant.core import HomeAssistant
 
 from custom_components.etag_display.ble_client import HAETagClient
@@ -31,12 +33,15 @@ async def test_read_battery(hass: HomeAssistant, mock_ble_device, mock_bleak_cli
     # Mock battery voltage: 2950mV (0x0B86 little-endian)
     mock_bleak_client.read_gatt_char.return_value = bytes([0x86, 0x0B])
 
-    with patch(
-        "custom_components.etag_display.ble_client.bluetooth.async_ble_device_from_address",
-        return_value=mock_ble_device,
-    ), patch(
-        "custom_components.etag_display.ble_client.BleakClient",
-        return_value=mock_bleak_client,
+    with (
+        patch(
+            "custom_components.etag_display.ble_client.bluetooth.async_ble_device_from_address",
+            return_value=mock_ble_device,
+        ),
+        patch(
+            "custom_components.etag_display.ble_client.BleakClient",
+            return_value=mock_bleak_client,
+        ),
     ):
         client = HAETagClient(hass, "AA:BB:CC:DD:EE:FF")
         battery = await client.read_battery()
@@ -45,17 +50,22 @@ async def test_read_battery(hass: HomeAssistant, mock_ble_device, mock_bleak_cli
     mock_bleak_client.read_gatt_char.assert_called_once_with(CHAR_BATTERY)
 
 
-async def test_read_temperature(hass: HomeAssistant, mock_ble_device, mock_bleak_client):
+async def test_read_temperature(
+    hass: HomeAssistant, mock_ble_device, mock_bleak_client
+):
     """Test reading temperature."""
     # Mock temperature: 23°C (0x17 signed)
     mock_bleak_client.read_gatt_char.return_value = bytes([0x17])
 
-    with patch(
-        "custom_components.etag_display.ble_client.bluetooth.async_ble_device_from_address",
-        return_value=mock_ble_device,
-    ), patch(
-        "custom_components.etag_display.ble_client.BleakClient",
-        return_value=mock_bleak_client,
+    with (
+        patch(
+            "custom_components.etag_display.ble_client.bluetooth.async_ble_device_from_address",
+            return_value=mock_ble_device,
+        ),
+        patch(
+            "custom_components.etag_display.ble_client.BleakClient",
+            return_value=mock_bleak_client,
+        ),
     ):
         client = HAETagClient(hass, "AA:BB:CC:DD:EE:FF")
         temp = await client.read_temperature()
@@ -69,14 +79,16 @@ async def test_write_image(hass: HomeAssistant, mock_ble_device, mock_bleak_clie
     bw_data = [0xFF] * 100  # Mock black/white data
     red_data = [0x00] * 100  # Mock red data
 
-    with patch(
-        "custom_components.etag_display.ble_client.bluetooth.async_ble_device_from_address",
-        return_value=mock_ble_device,
-    ), patch(
-        "custom_components.etag_display.ble_client.BleakClient",
-        return_value=mock_bleak_client,
-    ), patch(
-        "custom_components.etag_display.ble_client.asyncio.sleep"
+    with (
+        patch(
+            "custom_components.etag_display.ble_client.bluetooth.async_ble_device_from_address",
+            return_value=mock_ble_device,
+        ),
+        patch(
+            "custom_components.etag_display.ble_client.BleakClient",
+            return_value=mock_bleak_client,
+        ),
+        patch("custom_components.etag_display.ble_client.asyncio.sleep"),
     ):
         client = HAETagClient(hass, "AA:BB:CC:DD:EE:FF")
         await client.write_image(bw_data, red_data)

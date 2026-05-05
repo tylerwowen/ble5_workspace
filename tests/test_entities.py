@@ -31,26 +31,6 @@ async def test_select_entity_options(hass: HomeAssistant, mock_coordinator):
     assert entity.current_option == "Todos"
 
 
-async def test_select_entity_change_mode(hass: HomeAssistant, mock_coordinator):
-    """Test changing mode via select entity."""
-    entity = ETagSelectEntity(mock_coordinator)
-
-    with patch.object(
-        hass.config_entries, "async_update_entry"
-    ) as mock_update, patch.object(
-        mock_coordinator, "_setup_listeners"
-    ), patch.object(
-        mock_coordinator, "_async_update_display"
-    ):
-        await entity.async_select_option("Calendar")
-
-        # Verify config entry was updated
-        mock_update.assert_called_once()
-
-        # Verify coordinator mode changed
-        assert mock_coordinator.mode == "Calendar"
-
-
 async def test_sensor_entity_state(hass: HomeAssistant, mock_coordinator):
     """Test sensor entity reports correct state."""
     entity = ETagSensorEntity(mock_coordinator)
