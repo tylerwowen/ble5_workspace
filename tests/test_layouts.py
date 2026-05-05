@@ -1,13 +1,13 @@
 """Tests for new E-Tag layouts."""
+
 import json
 import os
-from datetime import datetime
-import pytest
+
 from PIL import Image
 
+from ui.constants import DISPLAY_SIZE_2IN9
 from ui.layouts.calendar import Calendar
 from ui.layouts.network_stats import NetworkStats
-from ui.constants import DISPLAY_SIZE_2IN9
 
 # Note: These tests must be run from repo root where ui/ is accessible
 

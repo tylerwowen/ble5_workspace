@@ -11,8 +11,9 @@ import os
 # Import from ui package for rendering
 import sys
 import tempfile
+from collections.abc import Callable
 from datetime import datetime, timedelta
-from typing import Any, Callable
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_STATE_CHANGED

@@ -20,18 +20,10 @@ class NetworkStats(BaseLayout):
         super().draw(image_draw)
 
         # Load font (using San Francisco Display for consistency)
-        title_font = ImageFont.truetype(
-            "ui/fonts/SanFranciscoDisplay-Regular.otf", 18
-        )
-        large_font = ImageFont.truetype(
-            "ui/fonts/SanFranciscoDisplay-Regular.otf", 60
-        )
-        label_font = ImageFont.truetype(
-            "ui/fonts/SanFranciscoDisplay-Regular.otf", 16
-        )
-        metric_font = ImageFont.truetype(
-            "ui/fonts/SanFranciscoDisplay-Regular.otf", 14
-        )
+        title_font = ImageFont.truetype("ui/fonts/SanFranciscoDisplay-Regular.otf", 18)
+        large_font = ImageFont.truetype("ui/fonts/SanFranciscoDisplay-Regular.otf", 60)
+        label_font = ImageFont.truetype("ui/fonts/SanFranciscoDisplay-Regular.otf", 16)
+        metric_font = ImageFont.truetype("ui/fonts/SanFranciscoDisplay-Regular.otf", 14)
 
         # Disable antialiasing for crisp display
         image_draw.fontmode = "1"

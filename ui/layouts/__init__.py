@@ -1,6 +1,6 @@
+import importlib
 import os
 import pkgutil
-import importlib
 
 # Get the current package name
 package_name = __name__

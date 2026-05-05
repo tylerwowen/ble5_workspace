@@ -14,4 +14,6 @@ class HelloWorld(HalfRed):
         image_draw.font = fnt
         image_draw.fontmode = "1"  # Disable antialiasing
         image_draw.text((10, 10), "Hello", fill="white")
-        image_draw.text((self.size[0] / 2, self.size[1] / 2 + 10), self.name, fill="black")
+        image_draw.text(
+            (self.size[0] / 2, self.size[1] / 2 + 10), self.name, fill="black"
+        )

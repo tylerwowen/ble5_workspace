@@ -1,4 +1,4 @@
-from tkinter import E, N, S, W, StringVar, Tk, ttk
+from tkinter import E, N, S, StringVar, Tk, W, ttk
 
 
 class FeetToMeters:

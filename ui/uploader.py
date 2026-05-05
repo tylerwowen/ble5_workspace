@@ -27,7 +27,7 @@ EPD_CMD_SNV_READ = 14
 EPD_CMD_SAVE_CFG = 15
 
 
-class Uploader(object):
+class Uploader:
     def __init__(
         self,
         name_prefix="C26_",
@@ -180,13 +180,13 @@ class Uploader(object):
         image_path = download_image_if_needed(image)
         # convert 6608697102119889260_296x152.jpg -dither FloydSteinberg -define dither:diffusion-amount=85% -remap palette.png bmp:output.bmp
         bw, red = image_to_bwr_data(image_path, width=width, height=height)
-        
+
         self._logger.debug("size of bw: %d, red: %d", len(bw), len(red))
         for i in range(0, len(bw), 64):
             chunk = bw[i : i + 64]
             hex_chunk = " ".join(f"{byte:02x}" for byte in chunk)
             self._logger.debug(hex_chunk)
-        
+
         try:
             async with self._ble_client() as client:
                 await self._upload_image_bwr_data(client, bw, red)

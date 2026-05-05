@@ -1,14 +1,16 @@
 """Test E-Tag Display Coordinator."""
+
 from __future__ import annotations
 
 import json
-from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
+from custom_components.etag_display.const import (
+    MODE_TODOS,
+)
 from custom_components.etag_display.coordinator import ETagDisplayCoordinator
-from custom_components.etag_display.const import MODE_TODOS, MODE_CALENDAR, MODE_NETWORK_STATS
 
 
 @pytest.fixture
@@ -41,13 +43,15 @@ async def test_update_display_skips_unchanged_content(mock_hass, mock_config_ent
     coordinator.last_hash = "abc123"
 
     # Mock data fetch and rendering
-    with patch.object(
-        coordinator, "_fetch_data", return_value={"todos": json.dumps([])}
-    ), patch(
-        "custom_components.etag_display.coordinator.image_to_bwr_data",
-        return_value=([0xFF] * 100, [0x00] * 100),
-    ), patch.object(
-        coordinator, "_render_layout", return_value="/tmp/test.png"
+    with (
+        patch.object(
+            coordinator, "_fetch_data", return_value={"todos": json.dumps([])}
+        ),
+        patch(
+            "custom_components.etag_display.coordinator.image_to_bwr_data",
+            return_value=([0xFF] * 100, [0x00] * 100),
+        ),
+        patch.object(coordinator, "_render_layout", return_value="/tmp/test.png"),
     ):
         # Mock hash computation to return same hash
         with patch(

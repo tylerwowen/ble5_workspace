@@ -1,7 +1,6 @@
 import logging
 import os
 import tempfile
-from math import log
 
 import fire
 from PIL import Image

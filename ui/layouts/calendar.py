@@ -1,4 +1,5 @@
 """Calendar layout for displaying daily events."""
+
 import json
 from datetime import datetime
 from types import SimpleNamespace
@@ -32,12 +33,8 @@ class Calendar(BaseLayout):
         super().draw(image_draw)
 
         # Font setup
-        title_font = ImageFont.truetype(
-            "ui/fonts/SanFranciscoDisplay-Regular.otf", 24
-        )
-        event_font = ImageFont.truetype(
-            "ui/fonts/SanFranciscoDisplay-Regular.otf", 20
-        )
+        title_font = ImageFont.truetype("ui/fonts/SanFranciscoDisplay-Regular.otf", 24)
+        event_font = ImageFont.truetype("ui/fonts/SanFranciscoDisplay-Regular.otf", 20)
 
         image_draw.fontmode = "1"  # Disable antialiasing
 
@@ -49,16 +46,14 @@ class Calendar(BaseLayout):
         title_bbox = image_draw.textbbox((10, 10), title, font=title_font)
         title_bottom = title_bbox[3]
         line_y = title_bottom + 8
-        image_draw.line(
-            (10, line_y, self.size[0] - 10, line_y), fill="black", width=2
-        )
+        image_draw.line((10, line_y, self.size[0] - 10, line_y), fill="black", width=2)
 
         # Draw events
         now = datetime.now()
         event_y = line_y + 15
         event_spacing = 22
 
-        for i, event in enumerate(self.events):
+        for _i, event in enumerate(self.events):
             # Determine if this is the current event
             is_current = event.start <= now < event.end
             fill = "red" if is_current else "black"

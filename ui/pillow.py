@@ -1,5 +1,4 @@
 from ui.constants import DisplaySize
-from ui.layouts import *
 
 
 def pillow(
