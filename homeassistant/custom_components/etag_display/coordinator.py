@@ -27,6 +27,13 @@ from .const import (
 )
 from .ble_client import HAETagClient
 
+# Import from ui package for rendering
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../"))
+from ui.pillow import pillow
+from ui.process_image import image_to_bwr_data
+from ui.constants import DisplaySize
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -256,7 +263,124 @@ class ETagDisplayCoordinator(DataUpdateCoordinator):
 
         return stats
 
+    async def _render_layout(self, data: dict[str, Any]) -> str:
+        """Render layout to image file using ui/pillow module."""
+        # Determine layout type based on mode
+        if self.mode == MODE_TODOS:
+            layout_type = "TodoList"
+        elif self.mode == MODE_CALENDAR:
+            layout_type = "Calendar"
+        elif self.mode == MODE_NETWORK_STATS:
+            layout_type = "NetworkStats"
+        else:
+            raise ValueError(f"Unknown mode: {self.mode}")
+
+        # Run rendering in executor (PIL operations are blocking)
+        def _render():
+            # Create temporary file for output
+            fd, output_path = tempfile.mkstemp(suffix=".png")
+            os.close(fd)
+
+            # Render layout
+            pillow(
+                layout_type=layout_type,
+                size=DisplaySize.TWO_INCH_NINE.name,
+                data=data,
+            )
+
+            # The pillow() function saves to temp dir with layout name
+            # We need to find and move it
+            temp_dir = tempfile.gettempdir()
+            rendered_file = os.path.join(temp_dir, f"{layout_type}.png")
+
+            # Move to our output path
+            if os.path.exists(rendered_file):
+                os.rename(rendered_file, output_path)
+                return output_path
+            else:
+                raise FileNotFoundError(f"Rendered file not found: {rendered_file}")
+
+        return await self.hass.async_add_executor_job(_render)
+
+    async def _upload_with_retry(
+        self, bw_data: list[int], red_data: list[int]
+    ) -> None:
+        """Upload image to device with exponential backoff retry."""
+        client = HAETagClient(self.hass, self.mac)
+
+        for attempt, delay in enumerate(BLE_RETRY_DELAYS, start=1):
+            try:
+                _LOGGER.debug(f"Upload attempt {attempt}/{len(BLE_RETRY_DELAYS)}")
+
+                # Upload image
+                await client.write_image(bw_data, red_data)
+
+                # Read diagnostics after successful upload
+                self.battery = await client.read_battery()
+                self.temp = await client.read_temperature()
+
+                _LOGGER.info(
+                    f"Display updated successfully (battery: {self.battery}mV, temp: {self.temp}C)"
+                )
+                return
+
+            except Exception as err:
+                _LOGGER.warning(f"Upload attempt {attempt} failed: {err}")
+
+                if attempt < len(BLE_RETRY_DELAYS):
+                    _LOGGER.debug(f"Retrying in {delay}s...")
+                    await asyncio.sleep(delay)
+                else:
+                    # Final attempt failed
+                    raise
+
     async def _async_update_display(self) -> None:
         """Update display with current content."""
-        # Placeholder - will be implemented in Task 5.4
-        pass
+        try:
+            _LOGGER.debug("Starting display update")
+
+            # Step 1: Fetch data from Home Assistant
+            data = await self._fetch_data()
+            _LOGGER.debug(f"Fetched data: {data}")
+
+            # Step 2: Render layout to image
+            image_path = await self._render_layout(data)
+            _LOGGER.debug(f"Rendered image: {image_path}")
+
+            # Step 3: Convert to BWR format
+            def _convert():
+                return image_to_bwr_data(image_path, DISPLAY_WIDTH, DISPLAY_HEIGHT)
+
+            bw_data, red_data = await self.hass.async_add_executor_job(_convert)
+            _LOGGER.debug(f"Converted to BWR (bw: {len(bw_data)}B, red: {len(red_data)}B)")
+
+            # Clean up temp file
+            try:
+                os.unlink(image_path)
+            except Exception:
+                pass
+
+            # Step 4: Compute hash
+            content_hash = hashlib.sha256(bytes(bw_data) + bytes(red_data)).hexdigest()
+            _LOGGER.debug(f"Content hash: {content_hash}")
+
+            # Step 5: Skip if unchanged
+            if content_hash == self.last_hash:
+                _LOGGER.info("Content unchanged, skipping upload")
+                return
+
+            # Step 6: Upload to device with retry
+            await self._upload_with_retry(bw_data, red_data)
+
+            # Step 7: Update state
+            self.last_hash = content_hash
+            self.last_update = datetime.now()
+            self.error = None
+
+            # Notify listeners
+            self.async_update_listeners()
+
+        except Exception as err:
+            _LOGGER.error(f"Display update failed: {err}", exc_info=True)
+            self.error = str(err)
+            self.async_update_listeners()
